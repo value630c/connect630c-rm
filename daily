@@ -2,108 +2,75 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>AntHive 利益率表示</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #000000;
-      color: white;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 24px;
-      background-color: #1e1e1e;
-      color: #f0f0f0;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-    }
-    h2 {
-      color: #00d1b2;
-      margin-bottom: 24px;
-    }
-    table {
-      width: 100%;
-      margin-top: 24px;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #444;
-    }
-    th {
-      background-color: #292929;
-    }
-    tbody tr:nth-child(even) {
-      background-color: #2c2c2c;
-    }
-    .bold {
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>ConnectのAntHiveの現在利益率は・・・</h2>
-    <p style="font-size: 1.1em;">
-      現在価格（USD）: <span id="currentPrice" class="bold">取得中...</span>
-    </p>
+  <title>現在地の天気予報</title>
 
-    <table>
-      <thead>
-        <tr>
-          <th>プラン</th>
-          <th style="text-align: center;">平均取得価格</th>
-          <th>利益率</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="bold">
-          <td>ソサエティ</td>
-          <td style="text-align: center;">$<span id="avg1">0.00006340877642</span></td>
-          <td id="result1">-</td>
-        </tr>
-        <tr>
-          <td>プレミアム</td>
-          <td style="text-align: center;">$<span id="avg2">0.0001984662265</span></td>
-          <td id="result2">-</td>
-        </tr>
-        <tr>
-          <td>一般</td>
-          <td style="text-align: center;">$<span id="avg3">0.00038975823</span></td>
-          <td id="result3">-</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <style>
+    .max_temp { display: inline-block !important; }
+    .min_temp { display: inline-block !important; }
+    .temp { display: block !important; }
+    .rain_s { display: block !important; }
+    .w_bg { background: linear-gradient(to right, #ffffff, #fff); }
+  </style>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.12/css/weather-icons-wind.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+  <!-- 天気取得スクリプト -->
+  <script src="https://sitecreation.co.jp/wp-content/themes/sango-theme-child/tpl/weather.js"></script>
+  <link rel="stylesheet" href="https://sitecreation.co.jp/wp-content/themes/sango-theme-child/tpl/style.css" id="PageStyleSheet">
 
   <script>
-    const avgPrices = [0.00006340877642, 0.0001984662265, 0.00038975823];
+    // 初期値：東京（万一現在地取得に失敗したとき用）
+    let lat = 35.69389;
+    let lon = 139.703613;
+    let inputText1 = "東京都新宿区";
+    let search_add = inputText1;
+    let weather_value = 7;
 
-    async function fetchPrice() {
-      try {
-        const res = await fetch("https://api.geckoterminal.com/api/v2/networks/optimism/pools/0xfd37dfb6a904c8355ef139f70a5ae9bb3908260b", {
-          headers: { accept: "application/json" }
-        });
-        const data = await res.json();
-        const current = parseFloat(data.data.attributes.base_token_price_usd);
-        document.getElementById("currentPrice").textContent = `$${current.toFixed(6)}`;
+    function showWeather(latVal, lonVal, name = "現在地") {
+      lat = latVal;
+      lon = lonVal;
+      inputText1 = name;
+      search_add = name;
 
-        avgPrices.forEach((avg, i) => {
-          const rate = ((current - avg) / avg) * 100;
-          const resultEl = document.getElementById(`result${i + 1}`);
-          resultEl.textContent = `${rate.toFixed(2)}%`;
-          resultEl.style.color = rate >= 0 ? "limegreen" : "red";
-        });
-      } catch (e) {
-        document.getElementById("currentPrice").textContent = "取得失敗";
+      $('#weather1').html('');
+      $('#weather2').html('');
+      if (typeof getWeather === 'function') {
+        getWeather(lat, lon, inputText1);
       }
     }
 
-    fetchPrice();
+    function getCurrentLocationAndWeather() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function (position) {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+            showWeather(userLat, userLon, "現在地");
+          },
+          function (error) {
+            console.warn("現在地の取得に失敗しました。東京の天気を表示します。");
+            showWeather(lat, lon, inputText1); // 東京をデフォルト表示
+          }
+        );
+      } else {
+        alert("このブラウザは位置情報に対応していません");
+        showWeather(lat, lon, inputText1);
+      }
+    }
+
+    // ページロード時に現在地取得＆天気表示
+    $(document).ready(function () {
+      getCurrentLocationAndWeather();
+    });
   </script>
+</head>
+<body>
+  <div id="weather-wrapper">
+    <div id="weather1"></div>
+    <div id="weather2"></div>
+  </div>
 </body>
 </html>

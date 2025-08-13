@@ -58,38 +58,38 @@
     }
 
     .item {
-  display: block;
-  margin: 16px 0;
-  font-size: 1.05em;
-}
+      display: block;
+      margin: 16px 0;
+      font-size: 1.05em;
+    }
 
     .label {
-  font-weight: bold;
-  color: #444;
-  margin-bottom: 4px;
-}
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 4px;
+    }
 
     .highlight {
-  color: #008060;
-  font-weight: bold;
-  font-size: 1.05em;
-  word-break: break-word;
-  white-space: normal;
-  padding-left: 1em;
-}
+      color: #008060;
+      font-weight: bold;
+      font-size: 1.05em;
+      word-break: break-word;
+      white-space: normal;
+      padding-left: 1em;
+    }
 
-    
     .profit-emphasis {
-    background: linear-gradient(to right, #ccffcc, #e6ffe6);
-    color: #000;
-    padding: 10px 14px;
-    border-radius: 10px;
-    text-align: left;
-    font-size: 1.05em;
-    font-weight: bold;
-    margin-top: 40px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  }
+      background: linear-gradient(to right, #ccffcc, #e6ffe6);
+      color: #000;
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-align: left;
+      font-size: 1.05em;
+      font-weight: bold;
+      margin-top: 40px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
     @media screen and (max-width: 600px) {
       .report-box {
         padding: 20px;
@@ -119,20 +119,20 @@
         padding: 10px;
       }
     }
-</style>
+  </style>
 </head>
 <body>
   <div class="report-box">
     <h1>🚀 AntHive 資産成長レポート</h1>
 
-    <!-- ▼ ソサエティメンバー情報 -->
+    <!-- ▼ ソサエティメンバー情報（元） -->
     <div class="section-title society-title">ソサエティメンバー</div>
     <div class="item">
-  <div class="label">AntHive現在価格（USD）</div>
-</div>
-<div class="item">
-  <div class="highlight" id="currentPrice">$0.000697</div>
-</div>
+      <div class="label">AntHive現在価格（USD）</div>
+    </div>
+    <div class="item">
+      <div class="highlight" id="currentPrice">$0.000697</div>
+    </div>
     <div class="item">
       <div class="label">1トークンあたりの価格平均（ソサエティ）</div>
       <div class="highlight">$0.00006340</div>
@@ -150,12 +150,37 @@
       🚀 上場直後から大きく価値を伸ばし、現在も非常に高い利益率を記録中
     </div>
 
+    <!-- ▼ ソサエティメンバー情報（複製） -->
+    <div class="section-title society-title">ソサエティメンバー（複製）</div>
+    <div class="item">
+      <div class="label">AntHive現在価格（USD）</div>
+    </div>
+    <div class="item">
+      <div class="highlight" id="currentPrice3">$0.000697</div>
+    </div>
+    <div class="item">
+      <div class="label">1トークンあたりの価格平均（ソサエティ）</div>
+      <div class="highlight">$0.00006340</div>
+    </div>
+    <div class="item">
+      <div class="label">利益率</div>
+      <div class="highlight" id="result3">計算中...</div>
+    </div>
+    <div class="item">
+      <div class="label">現在資産価値（元本10万円計算）</div>
+      <div class="highlight" id="value3">計算中...</div>
+    </div>
+
+    <div class="profit-emphasis">
+      🚀 上場直後から大きく価値を伸ばし、現在も非常に高い利益率を記録中
+    </div>
+
     <!-- ▼ CONNECT全体情報 -->
     <div class="section-title connect-title">CONNECT全体</div>
     <div class="item">
-  <div class="label">AntHive現在価格（USD）</div>
-  <div class="highlight" id="currentPrice2">$0.000697</div>
-</div>
+      <div class="label">AntHive現在価格（USD）</div>
+      <div class="highlight" id="currentPrice2">$0.000697</div>
+    </div>
     <div class="item">
       <div class="label">1トークンあたりの価格平均（CONNECT全体）</div>
       <div class="highlight">$0.00038976</div>
@@ -175,8 +200,8 @@
   </div>
 
   <script>
-    const avgPrices = [0.00006340877642, 0.00038975823];
-    const tokenAmounts = [314000000, 242000000]; // ソサエティとCONNECTの保有枚数（例）
+    // [0] ソサエティ（元） / [1] CONNECT / [2] ソサエティ（複製）
+    const avgPrices = [0.00006340877642, 0.00038975823, 0.00006340877642];
 
     async function fetchPrice() {
       try {
@@ -186,25 +211,37 @@
         const data = await res.json();
         const current = parseFloat(data.data.attributes.base_token_price_usd);
 
-        document.getElementById("currentPrice").textContent = `$${current.toFixed(6)}`;
-        document.getElementById("currentPrice2").textContent = `$${current.toFixed(6)}`;
+        // 価格表示
+        const priceEls = [
+          document.getElementById("currentPrice"),
+          document.getElementById("currentPrice2"),
+          document.getElementById("currentPrice3")
+        ];
+        priceEls.forEach(el => {
+          if (el) el.textContent = `$${current.toFixed(6)}`;
+        });
 
+        // 利益率・資産価値
         avgPrices.forEach((avg, i) => {
           const rate = (current / avg) * 100;
           const resultEl = document.getElementById(`result${i + 1}`);
-          const valueEl = document.getElementById(`value${i + 1}`);
+          const valueEl  = document.getElementById(`value${i + 1}`);
           const value = 100000 * (rate / 100);
 
-          resultEl.textContent = `${rate.toFixed(2)}%`;
-          resultEl.style.color = "#008060";
-
-          valueEl.textContent = `￥${Math.round(value).toLocaleString()} 円相当`;
+          if (resultEl) {
+            resultEl.textContent = `${rate.toFixed(2)}%`;
+            resultEl.style.color = "#008060";
+          }
+          if (valueEl) {
+            valueEl.textContent = `￥${Math.round(value).toLocaleString()} 円相当`;
+          }
         });
       } catch (e) {
-        document.getElementById("currentPrice").textContent = "取得失敗";
-        document.getElementById("currentPrice2").textContent = "取得失敗";
-        document.getElementById("value1").textContent = "取得失敗";
-        document.getElementById("value2").textContent = "取得失敗";
+        const ids = ["currentPrice", "currentPrice2", "currentPrice3", "value1", "value2", "value3"];
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = "取得失敗";
+        });
       }
     }
 

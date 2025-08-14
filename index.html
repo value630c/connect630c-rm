@@ -126,7 +126,7 @@
     <h1>🚀 AntHive 資産成長レポート</h1>
 
     <!-- ▼ 最上位グループ -->
-    <div class="section-title society-title">ソサエティメンバー</div>
+    <div class="section-title society-title">最上位グループ</div>
     <div class="item">
       <div class="label">AntHive現在価格（USD）</div>
     </div>
@@ -134,15 +134,15 @@
       <div class="highlight" id="currentPrice">$0.000697</div>
     </div>
     <div class="item">
-      <div class="label">1トークンあたりの価格平均（最上位グループ）</div>
-      <div class="highlight">$0.00006340</div>
+      <div class="label">1トークンあたりの価格目安（最上位グループ）</div>
+      <div class="highlight">$0.00003108</div>
     </div>
     <div class="item">
       <div class="label">利益率</div>
       <div class="highlight" id="result1">計算中...</div>
     </div>
     <div class="item">
-      <div class="label">現在資産価値（元本10万円計算）</div>
+      <div class="label">現在資産価値（元本30万円計算）</div>
       <div class="highlight" id="value1">計算中...</div>
     </div>
 
@@ -159,15 +159,15 @@
       <div class="highlight" id="currentPrice3">$0.000697</div>
     </div>
     <div class="item">
-      <div class="label">1トークンあたりの価格平均（ソサエティ）</div>
-      <div class="highlight">$0.00006340</div>
+      <div class="label">1トークンあたりの価格目安（上位グループ）</div>
+      <div class="highlight">$0.0002563</div>
     </div>
     <div class="item">
       <div class="label">利益率</div>
       <div class="highlight" id="result3">計算中...</div>
     </div>
     <div class="item">
-      <div class="label">現在資産価値（元本10万円計算）</div>
+      <div class="label">現在資産価値（元本20万円計算）</div>
       <div class="highlight" id="value3">計算中...</div>
     </div>
 
@@ -199,53 +199,52 @@
     </div>
   </div>
 
-  <script>
-    // [0] ソサエティ（元） / [1] CONNECT / [2] ソサエティ（複製）
-    const avgPrices = [0.00006340877642, 0.00038975823, 0.00006340877642];
+<script>
+  // [0] 最上位グループ / [1] CONNECT / [2] 上位グループ
+  const avgPrices   = [0.00003108, 0.00038975823, 0.0002563];
+  const principals  = [300000,      100000,        200000]; // 円
 
-    async function fetchPrice() {
-      try {
-        const res = await fetch("https://api.geckoterminal.com/api/v2/networks/optimism/pools/0xfd37dfb6a904c8355ef139f70a5ae9bb3908260b", {
-          headers: { accept: "application/json" }
-        });
-        const data = await res.json();
-        const current = parseFloat(data.data.attributes.base_token_price_usd);
+  async function fetchPrice() {
+    try {
+      const res = await fetch("https://api.geckoterminal.com/api/v2/networks/optimism/pools/0xfd37dfb6a904c8355ef139f70a5ae9bb3908260b", {
+        headers: { accept: "application/json" }
+      });
+      const data = await res.json();
+      const current = parseFloat(data?.data?.attributes?.base_token_price_usd);
 
-        // 価格表示
-        const priceEls = [
-          document.getElementById("currentPrice"),
-          document.getElementById("currentPrice2"),
-          document.getElementById("currentPrice3")
-        ];
-        priceEls.forEach(el => {
-          if (el) el.textContent = `$${current.toFixed(6)}`;
-        });
+      if (!Number.isFinite(current)) throw new Error("price parse error");
 
-        // 利益率・資産価値
-        avgPrices.forEach((avg, i) => {
-          const rate = (current / avg) * 100;
-          const resultEl = document.getElementById(`result${i + 1}`);
-          const valueEl  = document.getElementById(`value${i + 1}`);
-          const value = 100000 * (rate / 100);
+      // 価格表示
+      const priceEls = [
+        document.getElementById("currentPrice"),
+        document.getElementById("currentPrice2"),
+        document.getElementById("currentPrice3")
+      ];
+      priceEls.forEach(el => { if (el) el.textContent = `$${current.toFixed(6)}`; });
 
-          if (resultEl) {
-            resultEl.textContent = `${rate.toFixed(2)}%`;
-            resultEl.style.color = "#008060";
-          }
-          if (valueEl) {
-            valueEl.textContent = `￥${Math.round(value).toLocaleString()} 円相当`;
-          }
-        });
-      } catch (e) {
-        const ids = ["currentPrice", "currentPrice2", "currentPrice3", "value1", "value2", "value3"];
-        ids.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = "取得失敗";
-        });
-      }
+      // 利益率・資産価値
+      avgPrices.forEach((avg, i) => {
+        const resultEl = document.getElementById(`result${i + 1}`);
+        const valueEl  = document.getElementById(`value${i + 1}`);
+
+        const ratePct = (current / avg) * 100;              // 利益率（％）
+        const valueYen = principals[i] * (ratePct / 100);   // 資産価値（円）
+
+        if (resultEl) {
+          resultEl.textContent = `${ratePct.toFixed(2)}%`;
+          resultEl.style.color = "#008060";
+        }
+        if (valueEl) {
+          valueEl.textContent = `￥${Math.round(valueYen).toLocaleString("ja-JP")} 円相当`;
+        }
+      });
+    } catch (e) {
+      const ids = ["currentPrice", "currentPrice2", "currentPrice3", "value1", "value2", "value3"];
+      ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = "取得失敗"; });
     }
+  }
 
-    fetchPrice();
-  </script>
+  fetchPrice();
+</script>
 </body>
 </html>
